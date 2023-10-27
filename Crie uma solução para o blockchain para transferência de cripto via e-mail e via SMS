@@ -1,0 +1,71 @@
+from web3 import Web3
+
+# Conectar-se à blockchain
+w3 = Web3(Web3.HTTPProvider('sua_url_da_blockchain'))
+
+# Definir chaves privadas e públicas
+chave_privada = 'sua_chave_privada'
+chave_publica = w3.eth.account.privateKeyToAccount(chave_privada).address
+
+# Função para transferência de criptomoedas
+def transferir_cripto(destinatario, valor):
+    transacao = {
+        'from': chave_publica,
+        'to': destinatario,
+        'value': w3.toWei(valor, 'ether'),
+        'gas': 2000000,
+        'gasPrice': w3.toWei('50', 'gwei'),
+    }
+    assinatura = w3.eth.account.signTransaction(transacao, chave_privada)
+    transacao_hash = w3.eth.sendRawTransaction(assinatura.rawTransaction)
+    return w3.toHex(transacao_hash)
+
+# Exemplo de transferência de criptomoedas
+destinatario = 'endereço_da_carteira_do_destinatario'
+valor_em_ether = 0.01
+resultado = transferir_cripto(destinatario, valor_em_ether)
+print(f'Transação bem-sucedida. Hash: {resultado}')
+# Importar módulos necessários
+from email.mime.text import MIMEText
+import smtplib
+from twilio.rest import Client
+
+# Função para enviar criptomoeda via e-mail
+def enviar_via_email(destinatario, valor, criptomoeda):
+    msg = MIMEText(f"Você recebeu {valor} {criptomoeda}.")
+    msg['Subject'] = 'Transferência de Criptomoeda'
+    msg['From'] = 'seu_email@gmail.com'
+    msg['To'] = destinatario
+
+    # Conectar-se ao servidor SMTP e enviar e-mail
+    s = smtplib.SMTP('smtp.gmail.com', 587)
+    s.starttls()
+    s.login('seu_email@gmail.com', 'sua_senha')
+    s.send_message(msg)
+    s.quit()
+
+# Função para enviar criptomoeda via SMS
+def enviar_via_sms(numero, valor, criptomoeda):
+    account_sid = 'sua_account_sid'
+    auth_token = 'seu_auth_token'
+    client = Client(account_sid, auth_token)
+
+    message = client.messages.create(
+        body=f"Você recebeu {valor} {criptomoeda}.",
+        from_='seu_numero_twilio',
+        to=numero
+    )
+
+    print(message.sid)
+
+# Exemplo de uso das funções
+destinatario_email = 'destinatario@email.com'
+destinatario_numero = '+15558675309'
+valor_transferencia = 0.1
+criptomoeda = 'BTC'
+
+# Enviar via e-mail
+enviar_via_email(destinatario_email, valor_transferencia, criptomoeda)
+
+# Enviar via SMS
+enviar_via_sms(destinatario_numero, valor_transferencia, criptomoeda)
